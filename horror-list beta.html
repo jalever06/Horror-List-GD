@@ -1,0 +1,1515 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GD Horror List</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Roboto+Mono:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-dark: #0a0a0f;
+            --bg-secondary: #12121a;
+            --blood-red: #8b0000;
+            --blood-red-light: #dc143c;
+            --toxic-green: #39ff14;
+            --sickly-yellow: #9acd32;
+            --pale-gray: #c0c0c0;
+            --dark-purple: #2d1b4e;
+            --shadow-color: rgba(139, 0, 0, 0.5);
+            --youtube-red: #ff0000;
+            --weird-purple: #8b00ff;
+            --easy-yellow: #ffff00;
+            --hard-orange: #ff8c00;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--pale-gray);
+            font-family: 'Roboto Mono', monospace;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Efecto de grano y vignette */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.8) 100%),
+                url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0.6;
+        }
+
+        /* Ojos parpadeantes en el fondo */
+        .eyes-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .eye {
+            position: absolute;
+            width: 40px;
+            height: 20px;
+            background: radial-gradient(ellipse at center, #ff0000 0%, #8b0000 40%, transparent 70%);
+            border-radius: 50%;
+            opacity: 0;
+            animation: blink 4s infinite;
+            box-shadow: 0 0 20px rgba(139, 0, 0, 0.8);
+        }
+
+        .eye::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 8px;
+            height: 8px;
+            background: #000;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #ff0000;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 0.3; }
+            52% { opacity: 0; }
+            54% { opacity: 0.3; }
+        }
+
+        /* Header */
+        header {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            padding: 60px 20px;
+            background: linear-gradient(180deg, rgba(139,0,0,0.2) 0%, transparent 100%);
+            border-bottom: 3px solid var(--blood-red);
+        }
+
+        h1 {
+            font-family: 'Creepster', cursive;
+            font-size: 4rem;
+            color: var(--blood-red-light);
+            text-shadow: 
+                0 0 10px var(--blood-red),
+                0 0 20px var(--blood-red),
+                0 0 40px var(--blood-red),
+                4px 4px 0px #000;
+            letter-spacing: 4px;
+            animation: flicker 3s infinite alternate;
+            margin-bottom: 10px;
+        }
+
+        @keyframes flicker {
+            0%, 100% { opacity: 1; text-shadow: 0 0 10px var(--blood-red), 0 0 20px var(--blood-red); }
+            50% { opacity: 0.8; text-shadow: 0 0 5px var(--blood-red), 0 0 10px var(--blood-red); }
+            52% { opacity: 1; text-shadow: 0 0 20px var(--blood-red), 0 0 40px var(--blood-red); }
+            54% { opacity: 0.9; }
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--sickly-yellow);
+            text-transform: uppercase;
+            letter-spacing: 8px;
+            opacity: 0.8;
+            text-shadow: 0 0 10px rgba(154, 205, 50, 0.3);
+        }
+
+        /* Contenedor principal */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Barra de búsqueda/filtros estilo Pointercrate */
+        .controls {
+            background: var(--bg-secondary);
+            border: 1px solid var(--blood-red);
+            padding: 20px;
+            margin-bottom: 40px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+            box-shadow: 0 4px 20px var(--shadow-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .controls::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--blood-red), transparent, var(--blood-red));
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 200px;
+            position: relative;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 20px;
+            background: var(--bg-dark);
+            border: 1px solid #333;
+            color: var(--pale-gray);
+            font-family: 'Roboto Mono', monospace;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--blood-red);
+            box-shadow: 0 0 15px var(--shadow-color);
+        }
+
+        /* Lista de niveles */
+        .level-list {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .level-card {
+            background: var(--bg-secondary);
+            border: 2px solid #333;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: grid;
+            grid-template-columns: 140px 80px 1fr 180px;
+            align-items: center;
+            min-height: 140px;
+        }
+
+        .level-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: var(--blood-red);
+            transition: width 0.3s;
+        }
+
+        .level-card:hover {
+            border-color: var(--blood-red);
+            transform: translateX(10px);
+            box-shadow: -10px 0 30px var(--shadow-color);
+        }
+
+        .level-card:hover::before {
+            width: 100%;
+            opacity: 0.1;
+        }
+
+        /* THUMBNAIL/IMAGEN DEL NIVEL */
+        .level-thumbnail {
+            width: 120px;
+            height: 90px;
+            object-fit: cover;
+            border: 2px solid var(--blood-red);
+            border-radius: 4px;
+            margin-left: 10px;
+            filter: grayscale(30%) contrast(1.1) brightness(0.9);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            position: relative;
+            z-index: 2;
+            background-color: #1a1a1a;
+        }
+
+        .level-card:hover .level-thumbnail {
+            filter: grayscale(0%) contrast(1.2) brightness(1);
+            border-color: var(--blood-red-light);
+            box-shadow: 0 0 20px var(--shadow-color);
+            transform: scale(1.05);
+        }
+
+        .thumbnail-placeholder {
+            width: 120px;
+            height: 90px;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            border: 2px solid var(--blood-red);
+            border-radius: 4px;
+            margin-left: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--blood-red);
+            font-size: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .thumbnail-placeholder::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(139,0,0,0.2), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        /* Ranking number */
+        .rank {
+            font-family: 'Creepster', cursive;
+            font-size: 2.5rem;
+            color: var(--blood-red-light);
+            text-align: center;
+            text-shadow: 0 0 20px var(--blood-red);
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Info del nivel */
+        .level-info {
+            padding: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .level-name {
+            font-family: 'Creepster', cursive;
+            font-size: 2rem;
+            color: #fff;
+            margin-bottom: 8px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .level-creator {
+            font-size: 0.9rem;
+            color: var(--sickly-yellow);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .level-creator::before {
+            content: '👤';
+            filter: grayscale(100%) brightness(0.5) sepia(1) hue-rotate(-50deg) saturate(5);
+        }
+
+        .level-description {
+            font-size: 0.85rem;
+            line-height: 1.6;
+            color: #888;
+            max-width: 600px;
+        }
+
+        /* Tags/Stats simplificados */
+        .level-stats {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: flex-end;
+            position: relative;
+            z-index: 2;
+        }
+
+        .tag {
+            background: rgba(139, 0, 0, 0.2);
+            border: 1px solid var(--blood-red);
+            padding: 4px 12px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--blood-red-light);
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* NUEVO TAG RARO */
+        .tag.weird {
+            background: rgba(139, 0, 255, 0.2);
+            border-color: var(--weird-purple);
+            color: #da70d6;
+        }
+
+        .difficulty {
+            font-size: 1.5rem;
+            color: var(--toxic-green);
+            text-shadow: 0 0 10px rgba(57, 255, 20, 0.3);
+            margin-bottom: 5px;
+        }
+
+        /* COLORES ESPECÍFICOS DE DIFICULTAD */
+        .difficulty.easy {
+            color: var(--easy-yellow);
+            text-shadow: 0 0 10px rgba(255, 255, 0, 0.3);
+        }
+
+        .difficulty.hard {
+            color: var(--hard-orange);
+            text-shadow: 0 0 10px rgba(255, 140, 0, 0.3);
+        }
+
+        /* BOTÓN DE YOUTUBE */
+        .youtube-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 10;
+        }
+
+        .youtube-btn-main {
+            background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-family: 'Roboto Mono', monospace;
+            font-weight: bold;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .youtube-btn-main:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 0, 0, 0.5);
+            border-color: #fff;
+            background: linear-gradient(135deg, #ff3333 0%, #ff0000 100%);
+        }
+
+        .youtube-btn-main::before {
+            content: '▶';
+            font-size: 0.8rem;
+        }
+
+        .youtube-subtitle {
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 4px;
+            font-style: italic;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .youtube-btn:hover .youtube-subtitle {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Efecto de sangre goteando */
+        .blood-drip {
+            position: absolute;
+            top: -10px;
+            width: 2px;
+            height: 20px;
+            background: linear-gradient(to bottom, var(--blood-red), transparent);
+            animation: drip 3s infinite;
+            opacity: 0.6;
+        }
+
+        @keyframes drip {
+            0% { height: 0; opacity: 1; }
+            100% { height: 40px; opacity: 0; }
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: #444;
+            font-size: 0.8rem;
+            border-top: 1px solid #222;
+            margin-top: 60px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .footer-credits {
+            color: var(--blood-red-light);
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(220, 20, 60, 0.3);
+        }
+
+        .footer-copyright {
+            font-size: 0.75rem;
+            color: #555;
+            margin-top: 5px;
+        }
+
+        /* CONTADOR DE ACTUALIZACIÓN TRANSPARENTE */
+        .update-counter {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(10, 10, 15, 0.6);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(139, 0, 0, 0.3);
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            color: rgba(192, 192, 192, 0.6);
+            font-family: 'Roboto Mono', monospace;
+            z-index: 100;
+            pointer-events: none;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+        }
+
+        .update-counter:hover {
+            background: rgba(10, 10, 15, 0.8);
+            color: rgba(192, 192, 192, 0.9);
+            border-color: rgba(139, 0, 0, 0.6);
+        }
+
+        .update-counter .date {
+            color: rgba(220, 20, 60, 0.7);
+        }
+
+        .update-counter .time {
+            color: rgba(154, 205, 50, 0.7);
+        }
+
+        .update-counter .timezone {
+            color: rgba(100, 100, 100, 0.5);
+            font-size: 0.6rem;
+            display: block;
+            margin-top: 2px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            .level-card {
+                grid-template-columns: 100px 60px 1fr;
+                grid-template-rows: auto auto;
+            }
+            .level-thumbnail, .thumbnail-placeholder {
+                width: 80px;
+                height: 60px;
+                margin-left: 5px;
+            }
+            .level-stats {
+                grid-column: 1 / -1;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                padding-top: 0;
+                flex-wrap: wrap;
+            }
+            .rank { font-size: 1.8rem; }
+            .level-name { font-size: 1.5rem; }
+            .youtube-btn {
+                margin-top: 5px;
+            }
+            .update-counter {
+                bottom: 5px;
+                right: 5px;
+                font-size: 0.6rem;
+                padding: 6px 8px;
+            }
+        }
+
+        /* Scrollbar personalizada */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-dark);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--blood-red);
+            border-radius: 5px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--blood-red-light);
+        }
+
+        /* MODAL CORREGIDO */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 2000;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            border: 2px solid var(--blood-red);
+            max-width: 800px;
+            width: 100%;
+            margin: 40px auto;
+            padding: 40px;
+            position: relative;
+            box-shadow: 0 0 50px var(--shadow-color);
+            animation: modalAppear 0.3s ease;
+        }
+
+        @keyframes modalAppear {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .close-btn {
+            position: fixed;
+            top: 20px;
+            right: 40px;
+            font-size: 3rem;
+            color: var(--blood-red);
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 3000;
+            background: rgba(0,0,0,0.8);
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            border: 2px solid var(--blood-red);
+        }
+
+        .close-btn:hover {
+            transform: rotate(90deg) scale(1.1);
+            background: var(--blood-red);
+            color: #000;
+        }
+
+        .warning-text {
+            color: var(--blood-red-light);
+            font-size: 0.9rem;
+            margin-top: 20px;
+            padding: 15px;
+            border-left: 3px solid var(--blood-red);
+            background: rgba(139, 0, 0, 0.1);
+        }
+
+        .modal-image {
+            width: 100%;
+            max-height: 400px;
+            object-fit: cover;
+            border: 2px solid var(--blood-red);
+            margin-bottom: 20px;
+            filter: grayscale(20%);
+        }
+
+        @media (max-width: 768px) {
+            .close-btn {
+                top: 10px;
+                right: 10px;
+                width: 40px;
+                height: 40px;
+                font-size: 2rem;
+            }
+            .modal-content {
+                margin: 60px auto 20px;
+                padding: 30px 20px;
+            }
+            .modal-image {
+                max-height: 250px;
+            }
+        }
+		```css
+.header-youtube-link {
+    position: fixed; /* Esto asegura que se quede en la esquina aunque hagas scroll */
+    top: 20px;
+    right: 20px;
+    color: #ff0000;
+    font-size: 2.5rem;
+    z-index: 9999; /* Esto lo pone por encima de todo lo demás */
+    transition: all 0.3s ease;
+    text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+}
+
+.header-youtube-link:hover {
+    transform: scale(1.2) rotate(10deg);
+    filter: drop-shadow(0 0 15px #ff0000);
+}
+    </style>
+</head>
+<body>
+<a href="https://www.youtube.com/@hayashi06oficial" target="_blank" class="header-youtube-link">
+        <i class="fab fa-youtube"></i>
+    </a>
+    <!-- Ojos de fondo -->
+    <div class="eyes-container" id="eyesContainer"></div>
+
+    <!-- Contador de actualización transparente -->
+    <div class="update-counter" id="updateCounter">
+        <span class="date">5 Mar 2026</span> | <span class="time" id="caracasTime">--:--:--</span>
+        <span class="timezone">GMT-4</span>
+    </div>
+
+    <header>
+        <h1>GD HORROR LIST</h1>
+        <p class="subtitle">BETA</p>
+    </header>
+
+    <div class="container">
+        <div class="controls">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Buscar nivel o creador...">
+            </div>
+            <div class="tag">Total: <span id="totalCount">1</span></div>
+        </div>
+
+        <div class="level-list" id="levelList">
+            <!-- Nivel #1: Man Man -->
+            <div class="level-card" onclick="openModal('manman')">
+                <!-- THUMBNAIL MAN MAN - NUEVA URL -->
+                <img src="https://i.ytimg.com/vi/70xldv8f_mo/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLCxFD2uoC1Ya5ASr6AIoUqTaJpA4A" 
+                     alt="Man Man thumbnail" 
+                     class="level-thumbnail"
+                     onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1509248961158-e54f6934749c?w=400&h=300&fit=crop';">
+                
+                <div class="rank">#1</div>
+                <div class="level-info">
+                    <div class="level-name">
+                        Man Man
+                        <span style="font-size: 1rem; color: var(--blood-red);">⚠ GORE/HORROR</span>
+                    </div>
+                    <div class="level-creator">2003Devin / Devin2003</div>
+                    <div class="level-description">
+                        Nivel infame por su contenido grotesco y perturbador. Incluye imágenes de cuerpos mutilados, rostros deformados y escenas de violencia explícita. Considerado uno de los niveles más extremos y controvertidos de la comunidad. No recomendado para personas sensibles.
+                    </div>
+                </div>
+                <div class="level-stats">
+                    <div class="difficulty">EXTREME DEMON</div>
+                    <span class="tag">☠ GORE</span>
+                    <span class="tag">🔞 NSFW</span>
+                    
+                    <!-- BOTÓN YOUTUBE MAN MAN -->
+                    <a href="https://youtu.be/6984V9X3VsY?si=GqDOMp7La-ILJKhe" 
+                       target="_blank" 
+                       class="youtube-btn" 
+                       onclick="event.stopPropagation()">
+                        <div class="youtube-btn-main">Ver en YouTube</div>
+                        <div class="youtube-subtitle">Gameplay by: Schweppes</div>
+                    </a>
+                </div>
+                <div class="blood-drip" style="left: 20%; animation-delay: 0s;"></div>
+                <div class="blood-drip" style="left: 50%; animation-delay: 1s;"></div>
+                <div class="blood-drip" style="left: 80%; animation-delay: 2s;"></div>
+            </div>
+
+            <!-- Nivel #2: MAGNITOSHAHTINSK -->
+            <div class="level-card" onclick="openModal('magnitoshahtinsk')">
+                <!-- THUMBNAIL MAGNITOSHAHTINSK -->
+                <img src="https://i.ytimg.com/vi/rlpyMoQOGd0/sddefault.jpg" 
+                     alt="MAGNITOSHAHTINSK thumbnail" 
+                     class="level-thumbnail"
+                     onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=400&h=300&fit=crop';">
+                
+                <div class="rank">#2</div>
+                <div class="level-info">
+                    <div class="level-name">
+                        MAGNITOSHAHTINSK
+                        <span style="font-size: 1rem; color: var(--blood-red);">⚠ HORROR/JUMPSCARES</span>
+                    </div>
+                    <div class="level-creator">Angarariver & Ekzels</div>
+                    <div class="level-description">
+                        Nivel basado en un ARG ruso perturbador. Contiene sustos fuertes, atmósfera opresiva y elementos de horror psicológico extremo. La estética soviética decayente combinada con eventos paranormales crea una experiencia inmersiva y traumática. Múltiples finales oscuros.
+                    </div>
+                </div>
+                <div class="level-stats">
+                    <div class="difficulty">IMPOSSIBLE</div>
+                    <span class="tag">🎭 PSICOLÓGICO</span>
+                    <span class="tag">🔞 NSFW</span>
+                    
+                    <!-- BOTÓN YOUTUBE MAGNITOSHAHTINSK -->
+                    <a href="https://youtu.be/rlpyMoQOGd0?si=kD9v8xRQpujIzcGh" 
+                       target="_blank" 
+                       class="youtube-btn" 
+                       onclick="event.stopPropagation()">
+                        <div class="youtube-btn-main">Ver en YouTube</div>
+                        <div class="youtube-subtitle">Gameplay by Neiro</div>
+                    </a>
+                </div>
+                <div class="blood-drip" style="left: 25%; animation-delay: 0.2s;"></div>
+                <div class="blood-drip" style="left: 55%; animation-delay: 1.2s;"></div>
+                <div class="blood-drip" style="left: 75%; animation-delay: 2.2s;"></div>
+            </div>
+
+            <!-- Nivel #3: Red Rooms -->
+            <div class="level-card" onclick="openModal('redrooms')">
+                <!-- THUMBNAIL RED ROOMS -->
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMvTvLeTab4VTIwoHqRHNupgL8kSSbiUoC3Q&s" 
+                     alt="Red Rooms thumbnail" 
+                     class="level-thumbnail"
+                     onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=400&h=300&fit=crop';">
+                
+                <div class="rank">#3</div>
+                <div class="level-info">
+                    <div class="level-name">
+                        Red Rooms
+                        <span style="font-size: 1rem; color: var(--blood-red);">⚠ GORE</span>
+                    </div>
+                    <div class="level-creator">2003Devin / Devin2003</div>
+                    <div class="level-description">
+                        Inspirado en el concepto de las "Red Rooms" de la deep web. Contiene imágenes nauseabundas, lenguaje inapropiado y representaciones de asesinato. El nivel utiliza rotaciones extremas y secciones imposibles que generan frustración psicológica intencional.
+                    </div>
+                </div>
+                <div class="level-stats">
+                    <div class="difficulty">INSANE DEMON</div>
+                    <span class="tag">🎭 PSICOLÓGICO</span>
+                    <span class="tag">🔞 NSFW</span>
+                    
+                    <!-- BOTÓN YOUTUBE RED ROOMS -->
+                    <a href="https://youtu.be/RWDF1SVlw5U?si=sTG8NPc3tR2ZQrSO" 
+                       target="_blank" 
+                       class="youtube-btn" 
+                       onclick="event.stopPropagation()">
+                        <div class="youtube-btn-main">Ver en YouTube</div>
+                        <div class="youtube-subtitle">Gameplay by: Syakin</div>
+                    </a>
+                </div>
+                <div class="blood-drip" style="left: 30%; animation-delay: 0.5s;"></div>
+                <div class="blood-drip" style="left: 70%; animation-delay: 1.5s;"></div>
+            </div>
+
+            <!-- Nivel #4: Secrets of Wysteria -->
+            <div class="level-card" onclick="openModal('wysteria')">
+                <!-- THUMBNAIL SECRETS OF WYSTERIA -->
+                <img src="https://i.ytimg.com/vi/G0yo8BREgD0/maxresdefault.jpg" 
+                     alt="Wysteria thumbnail" 
+                     class="level-thumbnail"
+                     onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?w=400&h=300&fit=crop';">
+                
+                <div class="rank">#4</div>
+                <div class="level-info">
+                    <div class="level-name">
+                        Secrets of Wysteria
+                        <span style="font-size: 1rem; color: var(--sickly-yellow);">🎬 HORROR PSICOLÓGICO</span>
+                    </div>
+                    <div class="level-creator">Dakkuro</div>
+                    <div class="level-description">
+                        Es la replica exacta del video musical "Secrets of Wysteria" de Steampianist, y a su vez, un remake de Wysteria (nivel creado por TriAxis en la 2.0). Es tan similar al video que da miedo...
+                    </div>
+                </div>
+                <div class="level-stats">
+                    <div class="difficulty">AUTO</div>
+                    <span class="tag">🎭 PSICOLÓGICO</span>
+					<span class="tag">☠ HORROR</span>
+                    <!-- TAG GORE ELIMINADO DE WYSTERIA -->
+                    
+                    <!-- BOTÓN YOUTUBE WYSTERIA -->
+                    <a href="https://www.youtube.com/watch?v=zCXn9H0sGM4" 
+                       target="_blank" 
+                       class="youtube-btn" 
+                       onclick="event.stopPropagation()">
+                        <div class="youtube-btn-main">Ver en YouTube</div>
+                        <div class="youtube-subtitle">Gameplay by: Viprin</div>
+                    </a>
+                </div>
+                <div class="blood-drip" style="left: 15%; animation-delay: 0.3s;"></div>
+                <div class="blood-drip" style="left: 60%; animation-delay: 1.2s;"></div>
+                <div class="blood-drip" style="left: 85%; animation-delay: 2.1s;"></div>
+            </div>
+
+            <!-- Nivel #5: Peaceful (CORREGIDO - EASY DEMON) -->
+          <div class="level-card" onclick="openModal('peaceful')">
+    <img src="https://img.youtube.com/vi/hMDsmKRO8YI/maxresdefault.jpg" 
+         alt="Peaceful thumbnail" 
+         class="level-thumbnail"
+         onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1509248961158-e54f6934749c?w=400&h=300&fit=crop';">
+    
+    <div class="rank">#5</div>
+    <div class="level-info">
+        <div class="level-name">
+            Peaceful <span style="font-size: 1rem; color: var(--blood-red);">⚠ HORROR</span>
+        </div>
+        <div class="level-creator">Small & Zylenox</div>
+        <div class="level-description">
+            Nivel con título irónico que es todo menos pacífico. Explora temas de disturbios mentales y angustia existencial a través de una estética surrealista.
+        </div>
+    </div>
+    <div class="level-stats">
+        <div class="difficulty easy">EASY DEMON</div>
+        <span class="tag">🎭 PSICOLÓGICO</span>
+        
+        <a href="https://youtu.be/hMDsmKRO8YI?si=qUBFMOA_81QMtw8s" 
+           target="_blank" 
+           class="youtube-btn" 
+           onclick="event.stopPropagation()">
+            <div class="youtube-btn-main">YouTube</div>
+            <div class="youtube-subtitle">Gameplay by: Nexus</div>
+        </a>
+    </div>
+    <div class="blood-drip" style="left: 20%; animation-delay: 0.4s;"></div>
+    <div class="blood-drip" style="left: 50%; animation-delay: 1.4s;"></div>
+    <div class="blood-drip" style="left: 80%; animation-delay: 2.4s;"></div>
+</div>
+
+            <!-- Nivel #6: Too Kid Friendly (CORREGIDO - EASY DEMON) -->
+            <div class="level-card" onclick="openModal('tokidfriendly')">
+                <!-- THUMBNAIL TOO KID FRIENDLY -->
+                <img src="https://img.youtube.com/vi/_HORsFpKxiE/maxresdefault.jpg" 
+                     alt="Too Kid Friendly thumbnail" 
+                     class="level-thumbnail"
+                     onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=400&h=300&fit=crop';">
+                
+                <div class="rank">#6</div>
+                <div class="level-info">
+                    <div class="level-name">
+                        Too Kid Friendly
+                        <span style="font-size: 1rem; color: var(--blood-red);">⚠ HORROR</span>
+                    </div>
+                    <div class="level-creator">ExtoPlasm</div>
+                    <div class="level-description">
+                        Nivel con apariencia inocente que rápidamente degenera en pesadilla. Utiliza colores brillantes y personajes "amigables" que se distorsionan en horrores grotescos. Subversión extrema de temas infantiles con contenido explícito inesperado.
+                    </div>
+                </div>
+                <div class="level-stats">
+                    <!-- CORREGIDO: EASY DEMON (amarillo) -->
+                    <div class="difficulty easy">EASY DEMON</div>
+                    <span class="tag">☠ HORROR</span>
+                    
+                    <!-- BOTÓN YOUTUBE TOO KID FRIENDLY -->
+                    <a href="https://youtu.be/_HORsFpKxiE?si=ZqQobqcfs8r9vYz7" 
+                       target="_blank" 
+                       class="youtube-btn" 
+                       onclick="event.stopPropagation()">
+                        <div class="youtube-btn-main">Youtube</div>
+                        <div class="youtube-subtitle">Gameplay by: Nexus</div>
+                    </a>
+                </div>
+                <div class="blood-drip" style="left: 25%; animation-delay: 0.6s;"></div>
+                <div class="blood-drip" style="left: 55%; animation-delay: 1.6s;"></div>
+                <div class="blood-drip" style="left: 75%; animation-delay: 2.6s;"></div>
+            </div>
+
+            <!-- Nivel #7: World War -->
+            <div class="level-card" onclick="openModal('worldwar3')">
+                <!-- THUMBNAIL WORLD WAR III -->
+                <img src="https://img.youtube.com/vi/0suBmisaMgM/maxresdefault.jpg" 
+                     alt="World War thumbnail" 
+                     class="level-thumbnail"
+                     onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1509248961158-e54f6934749c?w=400&h=300&fit=crop';">
+                
+                <div class="rank">#7</div>
+                <div class="level-info">
+                    <div class="level-name">
+                        World War 
+                        <span style="font-size: 1rem; color: var(--blood-red);">⚠ HORROR</span>
+                    </div>
+                    <div class="level-creator">Devin2003 / 2003Devin</div>
+                    <div class="level-description">
+                        Representación gráfica de los horrores de la guerra con escenas de violencia extrema, destrucción masiva y sufrimiento humano. Combina elementos de terror psicológico con imágenes de conflicto armado, explosiones y consecuencias humanas devastadoras.
+                    </div>
+                </div>
+                <div class="level-stats">
+                    <div class="difficulty">EXTREME DEMON</div>
+                    <span class="tag">🎭 PSICOLÓGICO</span>
+                    <span class="tag">☠ GORE</span>
+                    
+                    <!-- BOTÓN YOUTUBE WORLD WAR -->
+                    <a href="https://youtu.be/0suBmisaMgM?si=VjeDNGjHvKqD13_O" 
+                       target="_blank" 
+                       class="youtube-btn" 
+                       onclick="event.stopPropagation()">
+                        <div class="youtube-btn-main">Youtube</div>
+                        <div class="youtube-subtitle">Gameplay by: Nexus</div>
+                    </a>
+                </div>
+                <div class="blood-drip" style="left: 30%; animation-delay: 0.7s;"></div>
+                <div class="blood-drip" style="left: 60%; animation-delay: 1.7s;"></div>
+                <div class="blood-drip" style="left: 90%; animation-delay: 2.7s;"></div>
+            </div>
+
+<!-- Nivel #8: Wysteria -->
+            <div class="level-card" onclick="openModal('wysteriatriaxis')">
+                <!-- THUMBNAIL WYSTERIA -->
+                <img src="https://i.ytimg.com/vi/ftctRo1qtvo/maxresdefault.jpg" 
+                     alt="Wysteria thumbnail" 
+                     class="level-thumbnail"
+                     onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?w=400&h=300&fit=crop';">
+                
+                <div class="rank">#8</div>
+                <div class="level-info">
+                    <div class="level-name">
+                        Wysteria
+                        <span style="font-size: 1rem; color: var(--sickly-yellow);">🎬 HORROR PSICOLÓGICO</span>
+                    </div>
+                    <div class="level-creator">TriAxis</div>
+                    <div class="level-description">
+                        Segundo nivel de la serie "TriAxis Films". Basado en el asesinato real de Grace Budd por el asesino en serie Albert Fish. Cortometraje de terror con efectos especiales extensos. Contiene imágenes de personas ahorcadas, rostros perturbadores y escenas de naturaleza maníaca. Ganador del premio Best Auto Level 2.0.
+                    </div>
+                </div>
+                <div class="level-stats">
+                    <div class="difficulty">AUTO</div>
+                    <span class="tag">🎭 PSICOLÓGICO</span>
+                    <!-- TAG GORE ELIMINADO DE WYSTERIA -->
+                    
+                    <!-- BOTÓN YOUTUBE WYSTERIA -->
+                    <a href="https://youtu.be/ftctRo1qtvo?si=e3vsJJ_Jk6T351-4" 
+                       target="_blank" 
+                       class="youtube-btn" 
+                       onclick="event.stopPropagation()">
+                        <div class="youtube-btn-main">YouTube</div>
+                        <div class="youtube-subtitle">Gameplay by: Partition</div>
+                    </a>
+                </div>
+                <div class="blood-drip" style="left: 15%; animation-delay: 0.3s;"></div>
+                <div class="blood-drip" style="left: 60%; animation-delay: 1.2s;"></div>
+                <div class="blood-drip" style="left: 85%; animation-delay: 2.1s;"></div>
+            </div>
+
+            <!-- Nivel #9: Hungry Humphrey (CORREGIDO - HARD) -->
+            <div class="level-card" onclick="openModal('hungryhumphrey')">
+                <!-- THUMBNAIL HUNGRY HUMPHREY -->
+                <img src="https://i.ytimg.com/vi/Hiz5Qpr2bI0/maxresdefault.jpg" 
+                     alt="Hungry Humphrey thumbnail" 
+                     class="level-thumbnail"
+                     onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?w=400&h=300&fit=crop';">
+                
+                <div class="rank">#9</div>
+                <div class="level-info">
+                    <div class="level-name">
+                        Hungry Humphrey
+                        <span style="font-size: 1rem; color: var(--weird-purple);">👽 BIZARRO</span>
+                    </div>
+                    <div class="level-creator">KrmaL</div>
+                    <div class="level-description">
+                        Nivel extremadamente extraño y surrealista que desafía toda lógica narrativa. Contiene imágenes bizarras, personajes grotescos en situaciones absurdas y una atmósfera de incomodidad constante. No es terror tradicional, sino una experiencia de maleza psicológica pura.
+                    </div>
+                </div>
+                <div class="level-stats">
+                    <!-- CORREGIDO: HARD (naranja) -->
+                    <div class="difficulty hard">HARD</div>
+                    <!-- NUEVO TAG RARO -->
+                    <span class="tag weird">👽 RARO</span>
+                    
+                    <!-- BOTÓN YOUTUBE HUNGRY HUMPHREY -->
+                    <a href="https://youtu.be/Hiz5Qpr2bI0?si=VbDsg2eiUwvfFYkJ" 
+                       target="_blank" 
+                       class="youtube-btn" 
+                       onclick="event.stopPropagation()">
+                        <div class="youtube-btn-main">Youtube</div>
+                        <div class="youtube-subtitle">Gameplay by: Nexus</div>
+                    </a>
+                </div>
+                <div class="blood-drip" style="left: 15%; animation-delay: 0.8s;"></div>
+                <div class="blood-drip" style="left: 45%; animation-delay: 1.8s;"></div>
+                <div class="blood-drip" style="left: 85%; animation-delay: 2.8s;"></div>
+            </div>
+
+            <!-- Nivel #10: Kidsmoke -->
+            <div class="level-card" onclick="openModal('kidsmoke')">
+    <img src="https://i.ytimg.com/vi/V4vp28en7Sc/maxresdefault.jpg" alt="kidsmoke thumbnail" class="level-thumbnail">
+    <div class="rank">#10</div>
+    <div class="level-info">
+        <div class="level-name">Kidsmoke
+		<span style="font-size: 1rem; color: var(--weird-purple);">👽 BIZARRO</span></div>
+        <div class="level-creator">SamUL</div>
+        <div class="level-description">
+            Kidsmoke es un nivel de Geometry Dash creado por SamUL. Es conocido por su estética minimalista y su atmósfera inquietante.
+        </div>
+    </div>
+    <div class="level-stats">
+        <div class="difficulty">EXTREME DEMON</div>
+		<!-- NUEVO TAG RARO -->
+                    <span class="tag weird">👽 RARO</span>
+        <a href="https://www.youtube.com/watch?v=V4vp28en7Sc" target="_blank" class="youtube-btn" onclick="event.stopPropagation()">
+            <div class="youtube-btn-main">Youtube</div>
+            <div class="youtube-subtitle">Gameplay by fnm04</div>
+        </a>
+    </div>
+</div>
+
+<div class="level-card" onclick="openModal('triplesix')">
+    <img src="https://i.ytimg.com/vi/4DvJKT3Eyfc/maxresdefault.jpg" alt="triplesix thumbnail" class="level-thumbnail">
+    <div class="rank">#11</div>
+    <div class="level-info">
+        <div class="level-name">Triple Six
+		<span style="font-size: 1rem; color: var(--weird-purple);">👽 BIZARRO</span></div>
+        <div class="level-creator">Zylenox</div>
+        <div class="level-description">
+            Triple Six es un legendario Extreme Demon creado por Zylenox, famoso por su terror psicológico y surrealista.
+        </div>
+    </div>
+    <div class="level-stats">
+        <div class="difficulty">EXTREME DEMON</div>
+        <span class="tag" style="background: rgba(75, 0, 130, 0.2); color: #9370DB; border: 1px solid #4b0082;">☠ HORROR</span>
+        <a href="https://youtu.be/4DvJKT3Eyfc?si=Zn9O-_kSX7KgmO7B" target="_blank" class="youtube-btn" onclick="event.stopPropagation()">
+            <div class="youtube-btn-main">Youtube</div>
+            <div class="youtube-subtitle">Gameplay by fnm04</div>
+        </a>
+    </div>
+</div>
+
+</div>
+
+    <!-- MODAL MAN MAN -->
+    <div id="modal-manman" class="modal" onclick="closeModalOnBackground(event, 'manman')">
+        <span class="close-btn" onclick="closeModal('manman')">&times;</span>
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <img src="https://i.ytimg.com/vi/70xldv8f_mo/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLCxFD2uoC1Ya5ASr6AIoUqTaJpA4A" 
+                 class="modal-image" 
+                 alt="Man Man preview"
+                 onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1509248961158-e54f6934749c?w=800&h=600&fit=crop';">
+            <h2 style="font-family: 'Creepster', cursive; color: var(--blood-red-light); font-size: 2.5rem; margin-bottom: 20px;">Man Man</h2>
+            <div style="color: #666; margin-bottom: 20px;">Creador: 2003Devin / Devin2003 | Dificultad: Extreme Demon</div>
+            <p style="line-height: 1.8; margin-bottom: 20px;">
+                Este nivel es considerado el Santo Grial de los niveles perturbadores de Geometry Dash. Contiene imágenes extremadamente gráficas de cuerpos mutilados, rostros deformados y escenas de violencia explícita que han resultado en su eliminación repetida de los servidores.
+            </p>
+            
+            <a href="https://youtu.be/6984V9X3VsY?si=GqDOMp7La-ILJKhe" 
+               target="_blank" 
+               class="youtube-btn" 
+               style="align-items: flex-start; margin-bottom: 20px;">
+                <div class="youtube-btn-main">▶ Ver Gameplay Completo</div>
+                <div class="youtube-subtitle">by Schweppes</div>
+            </a>
+            
+            <div class="warning-text">
+                ⚠️ ADVERTENCIA: Este nivel contiene contenido NSFL (Not Safe For Life) incluyendo gore realista y temas extremadamente perturbadores. No se recomienda su visualización bajo ninguna circunstancia.
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL MAGNITOSHAHTINSK -->
+    <div id="modal-magnitoshahtinsk" class="modal" onclick="closeModalOnBackground(event, 'magnitoshahtinsk')">
+        <span class="close-btn" onclick="closeModal('magnitoshahtinsk')">&times;</span>
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <img src="https://i.ytimg.com/vi/rlpyMoQOGd0/sddefault.jpg" 
+                 class="modal-image" 
+                 alt="MAGNITOSHAHTINSK preview"
+                 onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800&h=600&fit=crop';">
+            <h2 style="font-family: 'Creepster', cursive; color: var(--blood-red-light); font-size: 2.5rem; margin-bottom: 20px;">MAGNITOSHAHTINSK</h2>
+            <div style="color: #666; margin-bottom: 20px;">Creador: Angarariver & Ekzels | Dificultad: IMPOSSIBLE</div>
+            <p style="line-height: 1.8; margin-bottom: 20px;">
+                Nivel basado en un ARG (Alternate Reality Game) ruso de terror psicológico. La historia se desarrolla en la ciudad ficticia de Magnitoshahtinsk, donde eventos paranormales y decadencia soviética se mezclan para crear una atmósfera opresiva. Contiene múltiples sustos de impacto, mensajes cifrados y finales perturbadores que exploran temas de aislamiento y locura colectiva.
+            </p>
+            
+            <a href="https://youtu.be/rlpyMoQOGd0?si=kD9v8xRQpujIzcGh" 
+               target="_blank" 
+               class="youtube-btn" 
+               style="align-items: flex-start; margin-bottom: 20px;">
+                <div class="youtube-btn-main">▶ Ver Gameplay Completo</div>
+                <div class="youtube-subtitle">Video disponible</div>
+            </a>
+            
+            <div class="warning-text">
+                ⚠️ ADVERTENCIA: Contiene sustos fuertes (jump scares), imágenes de decadencia urbana, temas de locura y contenido psicológicamente perturbador. Recomendado solo para mayores de 18 años.
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL RED ROOMS -->
+    <div id="modal-redrooms" class="modal" onclick="closeModalOnBackground(event, 'redrooms')">
+        <span class="close-btn" onclick="closeModal('redrooms')">&times;</span>
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMvTvLeTab4VTIwoHqRHNupgL8kSSbiUoC3Q&s" 
+                 class="modal-image" 
+                 alt="Red Rooms preview"
+                 onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800&h=600&fit=crop';">
+            <h2 style="font-family: 'Creepster', cursive; color: var(--blood-red-light); font-size: 2.5rem; margin-bottom: 20px;">Red Rooms</h2>
+            <div style="color: #666; margin-bottom: 20px;">Creador: 2003Devin / Devin2003 | Dificultad: Insane Demon</div>
+            <p style="line-height: 1.8; margin-bottom: 20px;">
+                Inspirado en las leyendas urbanas de la deep web. El nivel combina imágenes grotescas con gameplay frustrante intencionalmente diseñado para crear angustia psicológica. Incluye rotate triggers que fallan la mitad del tiempo y secciones UFO gobernadas por la suerte.
+            </p>
+            
+            <a href="https://youtu.be/RWDF1SVlw5U?si=sTG8NPc3tR2ZQrSO" 
+               target="_blank" 
+               class="youtube-btn" 
+               style="align-items: flex-start; margin-bottom: 20px;">
+                <div class="youtube-btn-main">▶ Ver Gameplay Completo</div>
+                <div class="youtube-subtitle">by Syakin</div>
+            </a>
+            
+            <div class="warning-text">
+                ⚠️ ADVERTENCIA: Contiene imágenes disgustantes, lenguaje inapropiado y representaciones de asesinato. La canción "Heartbeat" de Snoodood añade una atmósfera de suspense constante.
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL SECRETS OF WYSTERIA -->
+    <div id="modal-wysteria" class="modal" onclick="closeModalOnBackground(event, 'wysteria')">
+        <span class="close-btn" onclick="closeModal('wysteria')">&times;</span>
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <img src="https://i.ytimg.com/vi/G0yo8BREgD0/maxresdefault.jpg" 
+                 class="modal-image" 
+                 alt="Wysteria preview"
+                 onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?w=800&h=600&fit=crop';">
+            <h2 style="font-family: 'Creepster', cursive; color: var(--blood-red-light); font-size: 2.5rem; margin-bottom: 20px;">Secrets of Wysteria</h2>
+            <div style="color: #666; margin-bottom: 20px;">Creador: Dakkuro | Dificultad: Auto</div>
+            <p style="line-height: 1.8; margin-bottom: 20px;">
+                Es un nivel basado en el pertubador video de la canción de Steampianist. Se hacen insinuaciones hacia canibalismo, secuestro e incluye imagenes fuertes (tristemente, basado en hechos reales).
+            </p>
+            
+            <a href="https://www.youtube.com/watch?v=zCXn9H0sGM4" 
+               target="_blank" 
+               class="youtube-btn" 
+               style="align-items: flex-start; margin-bottom: 20px;">
+                <div class="youtube-btn-main">▶ Ver Gameplay</div>
+                <div class="youtube-subtitle">by Viprin</div>
+            </a>
+            
+            <div class="warning-text">
+                ⚠️ ADVERTENCIA: Contiene asesinato y canibalismo, imágenes de personas asesinadas, sangre y contenido maníaco. No explícito
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL PEACEFUL -->
+    <div id="modal-peaceful" class="modal" onclick="closeModalOnBackground(event, 'peaceful')">
+        <span class="close-btn" onclick="closeModal('peaceful')">&times;</span>
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <img src="https://img.youtube.com/vi/hMDsmKRO8YI/maxresdefault.jpg" 
+                 class="modal-image" 
+                 alt="Peaceful preview"
+                 onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1509248961158-e54f6934749c?w=800&h=600&fit=crop';">
+            <h2 style="font-family: 'Creepster', cursive; color: var(--blood-red-light); font-size: 2.5rem; margin-bottom: 20px;">Peaceful</h2>
+            <!-- CORREGIDO EN MODAL -->
+            <div style="color: #666; margin-bottom: 20px;">Creador: Small & Zylenox | Dificultad: Easy Demon</div>
+            <p style="line-height: 1.8; margin-bottom: 20px;">
+                Nivel con título irónicamente tranquilo que esconde una pesadilla psicológica. La aparente calma visual se ve interrumpida por distorsiones surrealistas, mensajes subliminales perturbadores y una progresión hacia la locura. La música aparentemente serena contiene frecuencias inquietantes.
+            </p>
+            
+            <a href="https://www.youtube.com/watch?v=hMDsmKRO8YI" 
+               target="_blank" 
+               class="youtube-btn" 
+               style="align-items: flex-start; margin-bottom: 20px;">
+                <div class="youtube-btn-main">▶ Ver Gameplay</div>
+                <div class="youtube-subtitle">by Nexus</div>
+            </a>
+            
+            <div class="warning-text">
+                ⚠️ ADVERTENCIA: Contiene tripofobia (puede ser incomodo para algunos espectadores).
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL TOO KID FRIENDLY -->
+    <div id="modal-tokidfriendly" class="modal" onclick="closeModalOnBackground(event, 'tokidfriendly')">
+        <span class="close-btn" onclick="closeModal('tokidfriendly')">&times;</span>
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <img src="https://img.youtube.com/vi/_HORsFpKxiE/maxresdefault.jpg" 
+                 class="modal-image" 
+                 alt="Too Kid Friendly preview"
+                 onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800&h=600&fit=crop';">
+            <h2 style="font-family: 'Creepster', cursive; color: var(--blood-red-light); font-size: 2.5rem; margin-bottom: 20px;">Too Kid Friendly</h2>
+            <!-- CORREGIDO EN MODAL -->
+            <div style="color: #666; margin-bottom: 20px;">Creador: ExtoPlasm | Dificultad: Easy Demon</div>
+            <p style="line-height: 1.8; margin-bottom: 20px;">
+                Subversión extrema de contenido infantil. Lo que comienza como un nivel colorido y "amigable para niños" se corrompe rápidamente en pesadilla. Personajes caricaturescos se distorsionan en monstruos grotescos, colores brillantes se pudren en paletas enfermizas, y la alegría forzada se convierte en agonía.
+            </p>
+            
+            <a href="https://www.youtube.com/watch?v=_HORsFpKxiE" 
+               target="_blank" 
+               class="youtube-btn" 
+               style="align-items: flex-start; margin-bottom: 20px;">
+                <div class="youtube-btn-main">▶ Ver Gameplay</div>
+                <div class="youtube-subtitle">by Nexus</div>
+            </a>
+            
+            <div class="warning-text">
+                ⚠️ ADVERTENCIA: Distorsión extrema de temas infantiles con contenido gore explícito. No es apropiado para menores ni personas sensibles a la corrupción de imágenes inocentes.
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL WORLD WAR -->
+    <div id="modal-worldwar3" class="modal" onclick="closeModalOnBackground(event, 'worldwar3')">
+        <span class="close-btn" onclick="closeModal('worldwar3')">&times;</span>
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <img src="https://img.youtube.com/vi/0suBmisaMgM/maxresdefault.jpg" 
+                 class="modal-image" 
+                 alt="World War preview"
+                 onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1509248961158-e54f6934749c?w=800&h=600&fit=crop';">
+            <h2 style="font-family: 'Creepster', cursive; color: var(--blood-red-light); font-size: 2.5rem; margin-bottom: 20px;">World War III</h2>
+            <div style="color: #666; margin-bottom: 20px;">Creador: Devin2003 | Dificultad: Extreme Demon</div>
+            <p style="line-height: 1.8; margin-bottom: 20px;">
+                Representación gráfica y sin censura de los horrores del conflicto armado global. Escenas de destrucción masiva, consecuencias humanas devastadoras y la brutalidad de la guerra moderna.
+            </p>
+            
+            <a href="https://youtu.be/0suBmisaMgM?si=VjeDNGjHvKqD13_O" 
+               target="_blank" 
+               class="youtube-btn" 
+               style="align-items: flex-start; margin-bottom: 20px;">
+                <div class="youtube-btn-main">▶ Ver Gameplay</div>
+                <div class="youtube-subtitle">by Nexus</div>
+            </a>
+            
+            <div class="warning-text">
+                ⚠️ ADVERTENCIA: Contiene imágenes de violencia extrema, destrucción, sufrimiento humano y temas bélicos perturbadores. Puede ser especialmente inquietante para personas afectadas por conflictos armados.
+            </div>
+        </div>
+    </div>
+	
+	<!-- MODAL WYSTERIA -->
+    <div id="modal-wysteriatriaxis" class="modal" onclick="closeModalOnBackground(event, 'wysteriatriaxis')">
+        <span class="close-btn" onclick="closeModal('wysteriatriaxis')">&times;</span>
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <img src="https://i.ytimg.com/vi/ftctRo1qtvo/maxresdefault.jpg" 
+                 class="modal-image" 
+                 alt="Wysteria preview"
+                 onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?w=800&h=600&fit=crop';">
+            <h2 style="font-family: 'Creepster', cursive; color: var(--blood-red-light); font-size: 2.5rem; margin-bottom: 20px;">
+			Wysteria</h2>
+            <div style="color: #666; margin-bottom: 20px;">Creador: TriAxis | Dificultad: Auto</div>
+            <p style="line-height: 1.8; margin-bottom: 20px;">
+                Fue uno de los primeros niveles de horror en Geometry Dash, creado por TriAxis. "Wysteria" esta basada en "Los asesinatos de Albert Fish", asesino serial, abusador infantil y caníbal. Fue condenaish fue un asesino sedo y ejecutado por el homicidio de la pequeña Grace Budd.
+            </p>
+            
+            <a href="https://youtu.be/ftctRo1qtvo?si=Rlxw_aSoyXoBCTtQ" 
+               target="_blank" 
+               class="youtube-btn" 
+               style="align-items: flex-start; margin-bottom: 20px;">
+                <div class="youtube-btn-main">▶ Ver Gameplay</div>
+                <div class="youtube-subtitle">by Partition</div>
+            </a>
+            
+            <div class="warning-text">
+                ⚠️ ADVERTENCIA: Contiene imagenes de personas ahorcadas y referencias al suicidio.
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL HUNGRY HUMPHREY -->
+    <div id="modal-hungryhumphrey" class="modal" onclick="closeModalOnBackground(event, 'hungryhumphrey')">
+        <span class="close-btn" onclick="closeModal('hungryhumphrey')">&times;</span>
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <img src="https://i.ytimg.com/vi/Hiz5Qpr2bI0/maxresdefault.jpg" 
+                 class="modal-image" 
+                 alt="Hungry Humphrey preview"
+                 onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?w=800&h=600&fit=crop';">
+            <h2 style="font-family: 'Creepster', cursive; color: var(--blood-red-light); font-size: 2.5rem; margin-bottom: 20px;">Hungry Humphrey</h2>
+            <!-- CORREGIDO EN MODAL -->
+            <div style="color: #666; margin-bottom: 20px;">Creador: KrmaL | Dificultad: Hard</div>
+            <p style="line-height: 1.8; margin-bottom: 20px;">
+                Experiencia de bizarra y surrealiasta (algo graciosa) que desafía toda categorización. 
+            </p>
+            
+            <a href="https://youtu.be/Hiz5Qpr2bI0?si=vrtcN_KNTZI_IG5h" 
+               target="_blank" 
+               class="youtube-btn" 
+               style="align-items: flex-start; margin-bottom: 20px">
+                <div class="youtube-btn-main">▶ Ver Gameplay </div>
+                <div class="youtube-subtitle">by Nexus</div>
+            </a>
+            
+            <div class="warning-text">
+                ⚠️ ADVERTENCIA: Contenido extremadamente extraño y surrealista que puede causar incomodidad intensa, confusión y sensación de "wrongness". No sigue patrones narrativos convencionales.
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL KIDSMOKE -->
+    <div id="modal-kidsmoke" class="modal" onclick="closeModalOnBackground(event, 'kidsmoke')">
+        <span class="close-btn" onclick="closeModal('kidsmoke')">&times;</span>
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <img src="https://i.ytimg.com/vi/V4vp28en7Sc/maxresdefault.jpg" 
+                 class="modal-image" 
+                 alt="Kidsmoke preview"
+                 onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800&h=600&fit=crop';">
+            <h2 style="font-family: 'Creepster', cursive; color: var(--blood-red-light); font-size: 2.5rem; margin-bottom: 20px;">Kidsmoke</h2>
+            <div style="color: #666; margin-bottom: 20px;">Creador: SamUL | Dificultad: Insane Demon</div>
+            <p style="line-height: 1.8; margin-bottom: 20px;">
+                Distorsión de la infancia en pesadilla cósmica. Elementos de "show infantil" se corrompen revelando horrores existenciales. La estética juvenil se desmorona exponiendo vacíos existenciales y terror cósmico. Una experiencia de terror surreal que ataca la nostalgia.
+            </p>
+            
+            <a href="https://www.youtube.com/watch?v=V4vp28en7Sc" 
+               target="_blank" 
+               class="youtube-btn" 
+               style="align-items: flex-start; margin-bottom: 20px;">
+                <div class="youtube-btn-main">▶ Ver Gameplay </div>
+                <div class="youtube-subtitle">by Viprin</div>
+            </a>
+            
+            <div class="warning-text">
+                ⚠️ ADVERTENCIA: Corrupción de temas infantiles con elementos de horror cósmico y existencial. Puede ser perturbador para quienes conservan afecto por estéticas juveniles inocentes.
+            </div>
+        </div>
+    </div>
+	
+	<!-- MODAL TRIPLE SIX -->
+    <div id="modal-triplesix" class="modal" onclick="closeModalOnBackground(event, 'triplesix')">
+        <span class="close-btn" onclick="closeModal('triplesix')">&times;</span>
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <img src="https://i.ytimg.com/vi/4DvJKT3Eyfc/maxresdefault.jpg" 
+                 class="modal-image" 
+                 alt="Triplesix preview"
+                 onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800&h=600&fit=crop';">
+            <h2 style="font-family: 'Creepster', cursive; color: var(--blood-red-light); font-size: 2.5rem; margin-bottom: 20px;">Triple Six</h2>
+            <div style="color: #666; margin-bottom: 20px;">Creador: Zylenox | Dificultad: Extreme Demon</div>
+            <p style="line-height: 1.8; margin-bottom: 20px;">
+                Distorsión de la infancia en pesadilla cósmica. Elementos de "show infantil" se corrompen revelando horrores existenciales. La estética juvenil se desmorona exponiendo vacíos existenciales y terror cósmico. Una experiencia de terror surreal que ataca la nostalgia.
+            </p>
+            
+            <a href="https://www.youtube.com/watch?v=4DvJKT3Eyfc" 
+               target="_blank" 
+               class="youtube-btn" 
+               style="align-items: flex-start; margin-bottom: 20px;">
+                <div class="youtube-btn-main">▶ Ver Gameplay </div>
+                <div class="youtube-subtitle">by fnm04</div>
+            </a>
+            
+            <div class="warning-text">
+                ⚠️ ADVERTENCIA EPILEPSIA: Luces parpadeantes y muy intensas 
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>⚠ Esta lista es solo con fines informativos. Algunos niveles han sido eliminados de los servidores oficiales.</p>
+        <div class="footer-credits">Creado por: ElWhinte</div>
+        <div class="footer-copyright">© 2026 GD Horror List. Todos los derechos reservados.</div>
+    </footer>
+
+    <script>
+        // Generar ojos aleatorios en el fondo
+        function generateEyes() {
+            const container = document.getElementById('eyesContainer');
+            const eyeCount = 15;
+            
+            for (let i = 0; i < eyeCount; i++) {
+                const eye = document.createElement('div');
+                eye.className = 'eye';
+                eye.style.left = Math.random() * 100 + '%';
+                eye.style.top = Math.random() * 100 + '%';
+                eye.style.animationDelay = Math.random() * 4 + 's';
+                container.appendChild(eye);
+            }
+        }
+
+        // Actualizar hora de Caracas (GMT-4 / UTC-4)
+        function updateCaracasTime() {
+            const now = new Date();
+            
+            // Obtener UTC time
+            const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
+            
+            // Caracas es UTC-4 (GMT-4)
+            const caracasOffset = -4; // horas
+            const caracasTime = new Date(utcTime + (3600000 * caracasOffset));
+            
+            const hours = caracasTime.getHours().toString().padStart(2, '0');
+            const minutes = caracasTime.getMinutes().toString().padStart(2, '0');
+            const seconds = caracasTime.getSeconds().toString().padStart(2, '0');
+            
+            document.getElementById('caracasTime').textContent = `${hours}:${minutes}:${seconds}`;
+        }
+
+        // Actualizar cada segundo
+        setInterval(updateCaracasTime, 1000);
+        updateCaracasTime(); // Llamada inicial
+
+        // Búsqueda en tiempo real
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const cards = document.querySelectorAll('.level-card');
+            
+            cards.forEach(card => {
+                const text = card.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    card.style.display = 'grid';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            
+            const visible = document.querySelectorAll('.level-card[style*="grid"]').length;
+            document.getElementById('totalCount').textContent = visible;
+        });
+
+        // Modal functions
+        function openModal(id) {
+            document.getElementById('modal-' + id).style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(id) {
+            document.getElementById('modal-' + id).style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // Cerrar al hacer click en el fondo oscuro
+        function closeModalOnBackground(event, id) {
+            if (event.target.classList.contains('modal')) {
+                closeModal(id);
+            }
+        }
+
+        // Cerrar con tecla ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal').forEach(m => {
+                    m.style.display = 'none';
+                });
+                document.body.style.overflow = 'auto';
+            }
+        });
+
+        // Efecto de parpadeo aleatorio extra
+        setInterval(() => {
+            const eyes = document.querySelectorAll('.eye');
+            const randomEye = eyes[Math.floor(Math.random() * eyes.length)];
+            if (randomEye) {
+                randomEye.style.opacity = '0.6';
+                setTimeout(() => {
+                    randomEye.style.opacity = '0';
+                }, 200);
+            }
+        }, 3000);
+
+        generateEyes();
+    </script>
+</body>
+</html>
